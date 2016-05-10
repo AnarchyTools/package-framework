@@ -1,0 +1,30 @@
+(package
+    :name "osxframework"
+
+    :tasks {
+        :default {
+            :tool "atllbuild"
+            :output-type "dynamic-library"
+            :sources ["src/**.swift"]
+            :name "FooFramework"
+            :framework true
+        }
+        :packageatbin {
+            :tool "packageatbin"
+            :name "FooFramework"
+            :platforms ["all"]
+            :atllbuild-task "default"
+        }
+        :package {
+            :tool "shell"
+            :script "../../.atllbuild/products/package-framework --name FooFramework --info-plist Info.plist"
+            :dependencies ["packageatbin"]
+        }
+        :check {
+            :tool "shell"
+            :script "xcodebuild -scheme UseOSXFramework test"
+            :dependencies ["package"]
+        }
+    }
+
+)

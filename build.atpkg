@@ -1,0 +1,28 @@
+(package
+    :name "PackageFramework"
+    :external-packages [
+    {
+        :url "https://github.com/AnarchyTools/atfoundation.git"
+        :branch "master"
+    }]
+
+    :import-packages ["tests/osx/build.atpkg"]
+
+    :tasks {
+        :default {
+            :tool "atllbuild"
+            :sources ["src/**.swift"]
+            :output-type "executable"
+            :name "package_framework"
+            :dependencies ["atfoundation.atfoundation"]
+            :link-with ["atfoundation.a"]
+            :compile-options ["-g"]
+            :executable-name "package-framework"
+        }
+
+        :check {
+            :dependencies ["default" "osxframework.check"]
+            :tool "nop"
+        }
+    }
+)
