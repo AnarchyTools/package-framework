@@ -40,12 +40,14 @@
             :name "package_framework"
             :atllbuild-task "default"
             :platforms ["all"]
+            :dependencies ["default"]
         }
 
         :package {
             :tool "package-homebrew.attool"
             :name "package_framework"
             :github-project "AnarchyTools/package-framework"
+            :dependencies ["atbin"]
         }
 
         :check {
