@@ -70,11 +70,13 @@ class PackageFramework {
         try! FS.createDirectory(path: AVersionPath, intermediate: true)
         //'current' (produces code signing failures if absent)
         try! FS.symlinkItem(from: Path("A"), to: frameworkPath + "Versions/Current")
+
         //copy payload
         //atbin path
-        let atbinPath = Path("bin").appending("\(name).atbin")
+        let atbinPath = Path(env("ATBUILD_BIN_PATH")!).appending("\(name).atbin")
         let payloadPath = atbinPath.appending(name + ".dylib")
         try! FS.copyItem(from: payloadPath, to: AVersionPath.appending(name))
+
         try! FS.symlinkItem(from: relativeAVersionPath.appending(name), to: frameworkPath.appending(name))
 
         //copy modules
@@ -85,6 +87,7 @@ class PackageFramework {
         if FS.fileExists(path: swiftModulePath) {
             try! FS.copyItem(from: swiftModulePath, to: modulePath.appending("\(architecture).swiftmodule"))
         }
+
         let swiftDocPath = atbinPath.appending("\(platform).swiftdoc")
         if FS.fileExists(path: swiftDocPath) {
             try! FS.copyItem(from: swiftDocPath, to: modulePath.appending("\(architecture).swiftdoc"))

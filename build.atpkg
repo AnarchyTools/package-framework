@@ -21,8 +21,6 @@
         :branch "master"
     }]
 
-    :import-packages ["tests/osx/build.atpkg"]
-
     :tasks {
         :default {
             :tool "atllbuild"
@@ -40,7 +38,6 @@
             :name "package_framework"
             :atllbuild-task "default"
             :platforms ["all"]
-            :dependencies ["default"]
         }
 
         :package {
@@ -50,8 +47,13 @@
             :dependencies ["atbin"]
         }
 
+        :osxcheck {
+            :tool "shell"
+            :script "cd tests/osx && ~/Code/AnarchyTools/atbuild/bin/atbuild --toolchain xcode check"
+        }
+
         :check {
-            :dependencies ["default" "osxframework.check"]
+            :dependencies ["default" "osxcheck"]
             :tool "nop"
         }
     }
