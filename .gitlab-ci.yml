@@ -1,0 +1,17 @@
+stages:
+- build
+
+osx:
+    stage: build
+    script: 
+        - atpm fetch
+        - atbuild check
+        - atbuild package
+    tags:
+        - openswift
+        - atpm
+        - atbuild
+    artifacts:
+        paths:
+            - bin/package-framework-*.tar.xz
+            - bin/package-framework.rb

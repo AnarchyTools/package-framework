@@ -14,6 +14,7 @@
 
 (package
     :name "PackageFramework"
+    :version "0.1"
     :external-packages [
     {
         :url "https://github.com/AnarchyTools/atfoundation.git"
@@ -32,6 +33,19 @@
             :link-with ["atfoundation.a"]
             :compile-options ["-g"]
             :executable-name "package-framework"
+        }
+
+        :atbin {
+            :tool "packageatbin"
+            :name "package_framework"
+            :atllbuild-task "default"
+            :platforms ["all"]
+        }
+
+        :package {
+            :tool "package-homebrew.attool"
+            :name "package_framework"
+            :github-project "AnarchyTools/package-framework"
         }
 
         :check {
