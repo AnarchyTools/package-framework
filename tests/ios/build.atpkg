@@ -1,0 +1,55 @@
+;; Copyright (c) 2016 Anarchy Tools Contributors.
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;;   http:;;www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
+
+(package
+    :name "iosframework"
+
+    :tasks {
+        :default {
+            :tool "atllbuild"
+            :output-type "dynamic-library"
+            :sources ["src/**.swift"]
+            :name "FooFramework"
+            :framework true
+            :bitcode true
+        }
+        :packageatbin {
+            :tool "packageatbin"
+            :name "FooFramework"
+            :platforms ["all"]
+            :atllbuild-task "default"
+        }
+        :package {
+            :tool "shell"
+            :script "../../.atllbuild/products/package-framework --name FooFramework --info-plist Info.plist"
+            :dependencies ["packageatbin"]
+        }
+        :simcheck {
+            :tool "shell"
+            :script "xcodebuild -scheme UseiOSFramework test -destination 'platform=iOS Simulator,name=iPhone 6'"
+            :dependencies ["package"]
+        }
+        :devicecheck {
+            :tool "shell"
+            :script "xcodebuild -scheme UseiOSFramework test -destination 'platform=iOS,name=invalid'"
+            :dependencies ["package"]
+
+        }
+        :check {
+            :tool "nop"
+            :dependencies ["simcheck" "devicecheck"]
+        }
+    }
+
+)

@@ -87,15 +87,12 @@ class PackageFramework {
             //'current' (produces code signing failures if absent)
             try! FS.symlinkItem(from: Path("A"), to: frameworkPath + "Versions/Current")
         }
-        print("a")
 
         //copy payload
         //atbin path
         let atbinPath = Path(env("ATBUILD_BIN_PATH")!).appending("\(name).atbin")
         let payloadPath = atbinPath.appending(name + ".dylib")
-        print("copy \(payloadPath) \(AVersionPath.appending(name))")
         try! FS.copyItem(from: payloadPath, to: AVersionPath.appending(name))
-        print("b")
         if atbuildPlatform == "osx" {
             try! FS.symlinkItem(from: relativeAVersionPath.appending(name), to: frameworkPath.appending(name))
         }
@@ -103,17 +100,21 @@ class PackageFramework {
         let modulePath = AVersionPath.appending("Modules").appending(name + ".swiftmodule")
         try! FS.createDirectory(path: modulePath, intermediate: true)
         for (platform, architecture) in platformToArch {
+            //In frameworks, what AT calls "armv7" is called "arm".
+            let destArchitecture: String 
+            if architecture == "armv7" { destArchitecture = "arm" }
+            else { destArchitecture = architecture }
+
             let swiftModulePath = atbinPath.appending("\(platform).swiftmodule")
             if FS.fileExists(path: swiftModulePath) {
-                try! FS.copyItem(from: swiftModulePath, to: modulePath.appending("\(architecture).swiftmodule"))
+                try! FS.copyItem(from: swiftModulePath, to: modulePath.appending("\(destArchitecture).swiftmodule"))
             }
 
             let swiftDocPath = atbinPath.appending("\(platform).swiftdoc")
             if FS.fileExists(path: swiftDocPath) {
-                try! FS.copyItem(from: swiftDocPath, to: modulePath.appending("\(architecture).swiftdoc"))
+                try! FS.copyItem(from: swiftDocPath, to: modulePath.appending("\(destArchitecture).swiftdoc"))
             }
         }
-        print("c")
         if atbuildPlatform == "osx" {
             try! FS.symlinkItem(from: relativeAVersionPath.appending("Modules"), to: frameworkPath.appending("Modules"))
         }
@@ -134,22 +135,17 @@ class PackageFramework {
         catch SysError.FileExists { /* */ }
         catch { fatalError("\(error)")}
         for resource in resources {
-            print("f \(resource) \(resourcesPath)")
-
             try! FS.copyItem(from: Path(resource), to: resourcesPath + resource)
         }
         if atbuildPlatform == "ios" {
             try! FS.copyItem(from: Path(infoPlist), to: AVersionPath.appending("Info.plist"))
         }
 
-        print("e")
         if atbuildPlatform == "osx" {
             try! FS.symlinkItem(from: relativeAVersionPath + "Resources", to: frameworkPath + "Resources")
         }
-        print("d")
         //codesign
         let cmd = "codesign --force --deep --sign - --timestamp=none '\(AVersionPath)'"
-        print(cmd)
         if system(cmd) != 0 {
             fatalError("Codesign failed.")
         }
