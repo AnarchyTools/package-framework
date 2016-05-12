@@ -49,7 +49,7 @@
         ;;run on hardware
         :device-ci {
             :tool "shell"
-            :script "xcodebuild -scheme UseiOSFramework test -destination 'platform=iOS,name=Dca's iPod touch'"
+            :script "xcodebuild -scheme UseiOSFramework test -destination \"platform=iOS,name=Dca's iPod touch\""
             :dependencies ["package"]
 
         }
