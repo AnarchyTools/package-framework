@@ -39,15 +39,17 @@ func arg(_ larg: String) -> String? {
 class PackageFramework {
     func run() {
 
-        guard let platform = env("ATBUILD_PLATFORM") else {
+        guard let atbuildPlatform = env("ATBUILD_PLATFORM") else {
             fatalError("Set $ATBUILD_PLATFORM")
         }
-        let architecture: String
-        switch (platform) {
+        let platformToArch: [String:String]
+        switch (atbuildPlatform) {
             case "osx":
-            architecture = "x86_64"
+            platformToArch = ["osx":"x86_64"]
+            case "ios":
+            platformToArch = ["ios-arm64":"arm64","ios-armv7":"armv7","ios-i386":"i386","ios-x86_64":"x86_64"]
             default:
-            fatalError("Unsupported platform \(platform)")
+            fatalError("Unsupported platform \(atbuildPlatform)")
         }
 
         guard let name = arg(Options.Name.rawValue) else {
@@ -57,7 +59,9 @@ class PackageFramework {
         guard let infoPlist = arg(Options.InfoPlist.rawValue) else {
             fatalError("Specify a \(Options.InfoPlist.rawValue)")
         }
+
         var resources: [String] = [infoPlist]
+         
 
         //rm framework if it exists
         let frameworkPath = Path("bin/\(name).framework")
@@ -65,43 +69,84 @@ class PackageFramework {
         let _ = try? FS.createDirectory(path: frameworkPath)
 
         //'a' version
-        let relativeAVersionPath = Path("Versions/A")
-        let AVersionPath = frameworkPath + relativeAVersionPath
-        try! FS.createDirectory(path: AVersionPath, intermediate: true)
-        //'current' (produces code signing failures if absent)
-        try! FS.symlinkItem(from: Path("A"), to: frameworkPath + "Versions/Current")
+        let relativeAVersionPath: Path!
+        let AVersionPath: Path
+        switch(atbuildPlatform) {
+            case "osx":
+            relativeAVersionPath = Path("Versions/A")
+            AVersionPath = frameworkPath + relativeAVersionPath
+            case "ios":
+            relativeAVersionPath = nil
+            AVersionPath = frameworkPath
+            default:
+            fatalError("Unsupported platform \(atbuildPlatform)")
+        }
+
+        if atbuildPlatform == "osx" {
+            try! FS.createDirectory(path: AVersionPath, intermediate: true)
+            //'current' (produces code signing failures if absent)
+            try! FS.symlinkItem(from: Path("A"), to: frameworkPath + "Versions/Current")
+        }
+        print("a")
 
         //copy payload
         //atbin path
         let atbinPath = Path(env("ATBUILD_BIN_PATH")!).appending("\(name).atbin")
         let payloadPath = atbinPath.appending(name + ".dylib")
+        print("copy \(payloadPath) \(AVersionPath.appending(name))")
         try! FS.copyItem(from: payloadPath, to: AVersionPath.appending(name))
-
-        try! FS.symlinkItem(from: relativeAVersionPath.appending(name), to: frameworkPath.appending(name))
-
+        print("b")
+        if atbuildPlatform == "osx" {
+            try! FS.symlinkItem(from: relativeAVersionPath.appending(name), to: frameworkPath.appending(name))
+        }
         //copy modules
         let modulePath = AVersionPath.appending("Modules").appending(name + ".swiftmodule")
         try! FS.createDirectory(path: modulePath, intermediate: true)
+        for (platform, architecture) in platformToArch {
+            let swiftModulePath = atbinPath.appending("\(platform).swiftmodule")
+            if FS.fileExists(path: swiftModulePath) {
+                try! FS.copyItem(from: swiftModulePath, to: modulePath.appending("\(architecture).swiftmodule"))
+            }
 
-        let swiftModulePath = atbinPath.appending("\(platform).swiftmodule")
-        if FS.fileExists(path: swiftModulePath) {
-            try! FS.copyItem(from: swiftModulePath, to: modulePath.appending("\(architecture).swiftmodule"))
+            let swiftDocPath = atbinPath.appending("\(platform).swiftdoc")
+            if FS.fileExists(path: swiftDocPath) {
+                try! FS.copyItem(from: swiftDocPath, to: modulePath.appending("\(architecture).swiftdoc"))
+            }
         }
-
-        let swiftDocPath = atbinPath.appending("\(platform).swiftdoc")
-        if FS.fileExists(path: swiftDocPath) {
-            try! FS.copyItem(from: swiftDocPath, to: modulePath.appending("\(architecture).swiftdoc"))
+        print("c")
+        if atbuildPlatform == "osx" {
+            try! FS.symlinkItem(from: relativeAVersionPath.appending("Modules"), to: frameworkPath.appending("Modules"))
         }
-        try! FS.symlinkItem(from: relativeAVersionPath.appending("Modules"), to: frameworkPath.appending("Modules"))
 
         //copy resources
-        let resourcesPath = AVersionPath.appending("Resources")
-        try! FS.createDirectory(path: resourcesPath, intermediate: true)
+        let resourcesPath: Path
+        switch(atbuildPlatform) {
+            case "osx":
+            resourcesPath = AVersionPath.appending("Resources")
+            case "ios":
+            resourcesPath = AVersionPath
+            default:
+            fatalError("Unsupported platform \(atbuildPlatform)")
+        }
+        do {
+            try FS.createDirectory(path: resourcesPath, intermediate: true)
+        }
+        catch SysError.FileExists { /* */ }
+        catch { fatalError("\(error)")}
         for resource in resources {
+            print("f \(resource) \(resourcesPath)")
+
             try! FS.copyItem(from: Path(resource), to: resourcesPath + resource)
         }
-        try! FS.symlinkItem(from: relativeAVersionPath + "Resources", to: frameworkPath + "Resources")
+        if atbuildPlatform == "ios" {
+            try! FS.copyItem(from: Path(infoPlist), to: AVersionPath.appending("Info.plist"))
+        }
 
+        print("e")
+        if atbuildPlatform == "osx" {
+            try! FS.symlinkItem(from: relativeAVersionPath + "Resources", to: frameworkPath + "Resources")
+        }
+        print("d")
         //codesign
         let cmd = "codesign --force --deep --sign - --timestamp=none '\(AVersionPath)'"
         print(cmd)

@@ -50,6 +50,12 @@
         :osxcheck {
             :tool "shell"
             :script "cd tests/osx && ~/Code/AnarchyTools/atbuild/bin/atbuild --toolchain xcode check"
+            :dependencies ["default"]
+        }
+        :ioscheck {
+            :tool "shell"
+            :script "cd tests/ios && ~/Code/AnarchyTools/atbuild/bin/atbuild --toolchain xcode --platform ios check"
+            :dependencies ["default"]
         }
 
         :check {
