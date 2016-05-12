@@ -5,7 +5,7 @@ osx:
     stage: build
     script: 
         - atpm fetch
-        - atbuild check
+        - atbuild check-with-device-ci
         - atbuild package
     tags:
         - openswift
