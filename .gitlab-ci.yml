@@ -14,5 +14,5 @@ osx:
         - iosDevice
     artifacts:
         paths:
-            - bin/package-framework-*.tar.xz
+            - bin/package_framework-*.tar.xz
             - bin/package-framework.rb
