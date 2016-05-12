@@ -49,12 +49,12 @@
 
         :osxcheck {
             :tool "shell"
-            :script "cd tests/osx && ~/Code/AnarchyTools/atbuild/bin/atbuild --toolchain xcode check"
+            :script "cd tests/osx && atbuild --toolchain xcode check"
             :dependencies ["default"]
         }
         :ioscheck {
             :tool "shell"
-            :script "cd tests/ios && ~/Code/AnarchyTools/atbuild/bin/atbuild --toolchain xcode --platform ios check"
+            :script "cd tests/ios && atbuild --toolchain xcode --platform ios check"
             :dependencies ["default"]
         }
 
