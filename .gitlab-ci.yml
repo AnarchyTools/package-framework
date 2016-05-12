@@ -11,6 +11,7 @@ osx:
         - openswift
         - atpm
         - atbuild
+        - iosDevice
     artifacts:
         paths:
             - bin/package-framework-*.tar.xz

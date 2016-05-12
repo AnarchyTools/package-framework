@@ -57,10 +57,16 @@
             :script "cd tests/ios && atbuild --toolchain xcode --platform ios check"
             :dependencies ["default"]
         }
-
         :check {
-            :dependencies ["default" "osxcheck"]
+            :dependencies ["default" "osxcheck" "ioscheck"]
             :tool "nop"
+        }
+
+        ;;also run on hardware
+        :check-with-device-ci {
+            :tool "shell"
+            :script "cd tests/ios && atbuild --toolchain xcode --platform ios device-ci"
+            :dependencies ["check"]
         }
     }
 )

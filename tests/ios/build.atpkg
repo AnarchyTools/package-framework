@@ -40,16 +40,20 @@
             :script "xcodebuild -scheme UseiOSFramework test -destination 'platform=iOS Simulator,name=iPhone 6'"
             :dependencies ["package"]
         }
-        :devicecheck {
+
+        :check {
+            :tool "nop"
+            :dependencies ["simcheck"]
+        }
+
+        ;;run on hardware
+        :device-ci {
             :tool "shell"
-            :script "xcodebuild -scheme UseiOSFramework test -destination 'platform=iOS,name=invalid'"
+            :script "xcodebuild -scheme UseiOSFramework test -destination 'platform=iOS,name=Dca's iPod touch'"
             :dependencies ["package"]
 
         }
-        :check {
-            :tool "nop"
-            :dependencies ["simcheck" "devicecheck"]
-        }
+
     }
 
 )
