@@ -12,7 +12,7 @@
   :packages [
     {
       :url "https://github.com/AnarchyTools/atfoundation.git"
-      :used-commit "79d1549a9868328c755d6c5ddb346592091d0a44"
+      :used-commit "0dffccf9b125264671de5dae524dc1651e6236e2"
     }
   ]
 )
