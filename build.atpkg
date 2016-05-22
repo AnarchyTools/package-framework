@@ -14,7 +14,7 @@
 
 (package
     :name "PackageFramework"
-    :version "0.1"
+    :version "0.1.1"
     :external-packages [
     {
         :url "https://github.com/AnarchyTools/atfoundation.git"
