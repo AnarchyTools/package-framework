@@ -31,7 +31,7 @@
         }
         :package {
             :tool "shell"
-            :script "../../.atllbuild/products/package-framework --name FooFramework --info-plist Info.plist"
+            :script "../../.atllbuild/products/package-framework --name FooFramework --info-plist UnusualFolder/Info.plist"
             :dependencies ["packageatbin"]
         }
         :check {

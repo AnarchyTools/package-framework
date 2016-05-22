@@ -135,7 +135,8 @@ class PackageFramework {
         catch SysError.FileExists { /* */ }
         catch { fatalError("\(error)")}
         for resource in resources {
-            try! FS.copyItem(from: Path(resource), to: resourcesPath + resource)
+            let dest = resourcesPath + Path(resource).basename()
+            try! FS.copyItem(from: Path(resource), to: dest)
         }
         if atbuildPlatform == "ios" {
             try! FS.copyItem(from: Path(infoPlist), to: AVersionPath.appending("Info.plist"))
