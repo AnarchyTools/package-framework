@@ -21,6 +21,7 @@ private enum ModuleMapType: String {
 private enum Options: String {
     case InfoPlist = "info-plist"
     case Name = "name"
+    case Compress = "compress"
 }
 
 func env(_ feature: String) -> String? {
@@ -60,8 +61,13 @@ class PackageFramework {
             fatalError("Specify a \(Options.InfoPlist.rawValue)")
         }
 
+        let compress: Bool
+
+        if let c = arg(Options.Compress.rawValue) {
+            if c == "true" { compress = true } else { compress = false}
+        } else { compress = false }
+
         var resources: [String] = [infoPlist]
-         
 
         //rm framework if it exists
         let frameworkPath = Path("bin/\(name).framework")
@@ -149,6 +155,23 @@ class PackageFramework {
         let cmd = "codesign --force --deep --sign - --timestamp=none '\(AVersionPath)'"
         if system(cmd) != 0 {
             fatalError("Codesign failed.")
+        }
+
+        if compress {
+            guard let packageVersion = env("ATBUILD_PACKAGE_VERSION") else {
+                fatalError("No package version / ATBUILD_PACKAGE_VERSION")
+            }
+            let tarxz = "bin/\(name)-\(packageVersion).tar.xz"
+            //detect compression level
+            let fc: Bool
+            if env("ATBUILD_CONFIGURATION_FAST_COMPILE")=="1" {
+                fc = true
+            } else { fc = false}
+            let compressionLevel = fc ? "0" :"9"
+            let cmd = "tar c --options \"xz:compression-level=\(compressionLevel)\" -Jf \(tarxz) bin/\(name).framework -C bin"
+            if system(cmd) != 0 {
+                fatalError("compress failed")
+            }
         }
     }
 }
