@@ -39,7 +39,9 @@ func arg(_ larg: String) -> String? {
 
 class PackageFramework {
     func run() {
-
+        print("package-framework 1.0")
+        print("© 2016 Anarchy Tools Contributors")
+        
         guard let atbuildPlatform = env("ATBUILD_PLATFORM") else {
             fatalError("Set $ATBUILD_PLATFORM")
         }
