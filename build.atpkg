@@ -14,7 +14,7 @@
 
 (package
     :name "PackageFramework"
-    :version "1.0"
+    :version "1.0.1"
     :external-packages [
     {
         :url "https://github.com/AnarchyTools/atfoundation.git"
@@ -28,7 +28,7 @@
             :output-type "executable"
             :name "package_framework"
             :dependencies ["atfoundation.atfoundation"]
-            :link-with ["atfoundation.a"]
+            :link-with-product ["atfoundation.a"]
             :compile-options ["-g"]
             :executable-name "package-framework"
         }

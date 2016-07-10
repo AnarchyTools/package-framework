@@ -163,7 +163,7 @@ class PackageFramework {
             guard let packageVersion = env("ATBUILD_PACKAGE_VERSION") else {
                 fatalError("No package version / ATBUILD_PACKAGE_VERSION")
             }
-            let tarxz = "bin/\(name)-\(packageVersion).tar.xz"
+            let tarxz = "bin/\(name)-\(packageVersion)-\(atbuildPlatform).tar.xz"
             //detect compression level
             let fc: Bool
             if env("ATBUILD_CONFIGURATION_FAST_COMPILE")=="1" {
