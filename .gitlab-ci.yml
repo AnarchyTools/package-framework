@@ -6,7 +6,7 @@ osx:
     script: 
         - atpm fetch
         - atbuild check-with-device-ci
-        - atbuild package
+        - atbuild package --configuration release
     tags:
         - openswift
         - atpm
